@@ -1,0 +1,365 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <meta http-equiv="Content-Style-Type" content="text/css">
+  <title></title>
+  <meta name="Generator" content="Cocoa HTML Writer">
+  <meta name="CocoaVersion" content="2685.4">
+  <style type="text/css">
+    p.p1 {margin: 0.0px 0.0px 0.0px 0.0px; font: 12.0px Helvetica}
+    p.p2 {margin: 0.0px 0.0px 0.0px 0.0px; font: 12.0px Helvetica; min-height: 14.0px}
+  </style>
+</head>
+<body>
+<p class="p1">&lt;!DOCTYPE html&gt;</p>
+<p class="p1">&lt;html lang="zh-CN"&gt;</p>
+<p class="p1">&lt;head&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;meta charset="UTF-8"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;meta name="viewport" content="width=device-width, initial-scale=1.0"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;title&gt;时间投资营收系统&lt;/title&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;!-- Tailwind CSS (界面美化) --&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;script src="https://cdn.tailwindcss.com"&gt;&lt;/script&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;!-- Vue 3 (数据绑定与逻辑控制) --&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;script src="https://unpkg.com/vue@3/dist/vue.global.js"&gt;&lt;/script&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;!-- Chart.js (趋势图表) --&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;script src="https://cdn.jsdelivr.net/npm/chart.js"&gt;&lt;/script&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;style&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>/* 隐藏滚动条但保持功能 */</p>
+<p class="p1"><span class="Apple-converted-space">        </span>.no-scrollbar::-webkit-scrollbar { display: none; }</p>
+<p class="p1"><span class="Apple-converted-space">        </span>.no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;/style&gt;</p>
+<p class="p1">&lt;/head&gt;</p>
+<p class="p1">&lt;body class="bg-slate-50 text-slate-800 font-sans min-h-screen"&gt;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;div id="app" class="max-w-6xl mx-auto p-4 md:p-8"&gt;</p>
+<p class="p2"><span class="Apple-converted-space">        </span></p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;!-- 头部导航与核心资产面板 --&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;header class="mb-8 flex flex-col md:flex-row md:items-center md:justify-between gap-4"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;h1 class="text-2xl md:text-3xl font-extrabold text-emerald-600"&gt;时间投资营收系统&lt;/h1&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;p class="text-sm text-slate-500 mt-1"&gt;把时间作为资产，转化为你的长期收益&lt;/p&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;/div&gt;</p>
+<p class="p2"><span class="Apple-converted-space">            </span></p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;!-- 日期选择与今日资产概览 --&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;div class="flex items-center gap-3"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;input type="date" v-model="selectedDate" @change="loadDateData"<span class="Apple-converted-space"> </span></p>
+<p class="p1"><span class="Apple-converted-space">                       </span>class="border border-slate-200 rounded-lg px-3 py-2 text-sm font-semibold text-slate-700 bg-white shadow-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;button @click="setToToday" class="bg-slate-200 hover:bg-slate-300 px-3 py-2 rounded-lg text-sm font-medium transition-colors"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>今天</p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;/button&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;/header&gt;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;!-- 今日资产看板 --&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;section class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;!-- 总资产卡片 --&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 flex flex-col justify-between"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;span class="text-xs font-semibold text-slate-400 uppercase tracking-wider"&gt;每日初始资产&lt;/span&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;span class="text-3xl font-black text-slate-700 mt-2"&gt;2400 元 &lt;span class="text-sm font-normal text-slate-400"&gt;(24小时)&lt;/span&gt;&lt;/span&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;div class="w-full bg-slate-100 h-2 rounded-full mt-4 overflow-hidden"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>&lt;div class="bg-slate-400 h-full" style="width: 100%"&gt;&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;/div&gt;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;!-- 已投资资产卡片 --&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;div class="bg-emerald-50 p-6 rounded-2xl shadow-sm border border-emerald-100 flex flex-col justify-between"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;span class="text-xs font-semibold text-emerald-600 uppercase tracking-wider"&gt;今日已产生收益&lt;/span&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;span class="text-3xl font-black text-emerald-700 mt-2"&gt;{{ totalRevenue }} 元&lt;/span&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;div class="w-full bg-emerald-200 h-2 rounded-full mt-4 overflow-hidden"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>&lt;div class="bg-emerald-500 h-full" :style="{ width: (totalHours / 24 * 100) + '%' }"&gt;&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;/div&gt;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;!-- 未分配资产卡片 --&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 flex flex-col justify-between"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;span class="text-xs font-semibold text-slate-400 uppercase tracking-wider"&gt;剩余可投资资产&lt;/span&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;span class="text-3xl font-black mt-2" :class="remainingHours &gt;= 0 ? 'text-amber-600' : 'text-rose-600'"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>{{ remainingRevenue }} 元 &lt;span class="text-sm font-normal text-slate-400"&gt;({{ remainingHours.toFixed(1) }}h)&lt;/span&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;/span&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;div class="w-full bg-slate-100 h-2 rounded-full mt-4 overflow-hidden"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>&lt;div :class="remainingHours &gt;= 0 ? 'bg-amber-500' : 'bg-rose-500'" h-full<span class="Apple-converted-space"> </span></p>
+<p class="p1"><span class="Apple-converted-space">                         </span>:style="{ width: Math.max(0, Math.min(100, (remainingHours / 24 * 100))) + '%' }"&gt;&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;/section&gt;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;!-- 主内容区域：左侧输入，右侧图表趋势 --&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;main class="grid grid-cols-1 lg:grid-cols-12 gap-8"&gt;</p>
+<p class="p2"><span class="Apple-converted-space">            </span></p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;!-- 左侧：时间投资表单 (8/12) --&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;div class="lg:col-span-7 bg-white p-6 rounded-2xl shadow-sm border border-slate-100"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;div class="flex justify-between items-center mb-6"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>&lt;h2 class="text-lg font-bold text-slate-700"&gt;时间分配与投资&lt;/h2&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>&lt;span v-if="totalHours &gt; 24" class="text-xs font-semibold text-rose-500 bg-rose-50 px-2 py-1 rounded"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>⚠️ 超过单日24小时限制！</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>&lt;/span&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;/div&gt;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;div class="space-y-5"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>&lt;div v-for="(cat, key) in categories" :key="key" class="p-4 rounded-xl border border-slate-100 bg-slate-50/50 hover:bg-slate-50 transition-colors"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>&lt;div class="flex justify-between items-center mb-2"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                            </span>&lt;div class="flex items-center gap-2"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                                </span>&lt;span class="w-3 h-3 rounded-full" :class="cat.color"&gt;&lt;/span&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                                </span>&lt;span class="font-semibold text-slate-700"&gt;{{ cat.name }}&lt;/span&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                            </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                            </span>&lt;div class="text-sm font-bold text-slate-600"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                                </span>&lt;span class="text-emerald-600"&gt;+¥{{ (inputs[key] || 0) * 100 }}&lt;/span&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                                </span>&lt;span class="text-xs font-normal text-slate-400 ml-1"&gt;({{ inputs[key] || 0 }}h)&lt;/span&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                            </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>&lt;/div&gt;</p>
+<p class="p2"><span class="Apple-converted-space">                        </span></p>
+<p class="p1"><span class="Apple-converted-space">                        </span>&lt;!-- 滑块与输入框协同 --&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>&lt;div class="flex items-center gap-4"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                            </span>&lt;input type="range" min="0" max="24" step="0.5"<span class="Apple-converted-space"> </span></p>
+<p class="p1"><span class="Apple-converted-space">                                   </span>v-model.number="inputs[key]" @input="validateAndSave"</p>
+<p class="p1"><span class="Apple-converted-space">                                   </span>class="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-emerald-500"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                            </span>&lt;input type="number" min="0" max="24" step="0.5"<span class="Apple-converted-space"> </span></p>
+<p class="p1"><span class="Apple-converted-space">                                   </span>v-model.number="inputs[key]" @input="validateAndSave"</p>
+<p class="p1"><span class="Apple-converted-space">                                   </span>class="w-16 border border-slate-200 rounded px-1.5 py-0.5 text-center text-sm font-semibold focus:outline-emerald-500"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;/div&gt;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;!-- 重置按钮 --&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;div class="mt-6 flex justify-end"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>&lt;button @click="resetCurrentDay" class="text-sm text-slate-400 hover:text-rose-500 font-medium transition-colors"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>清空今日投资</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>&lt;/button&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;/div&gt;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;!-- 右侧：收益趋势分析 (5/12) --&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;div class="lg:col-span-5 flex flex-col gap-6"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;!-- 投资占比饼图 --&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 flex flex-col items-center"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>&lt;h2 class="text-lg font-bold text-slate-700 self-start mb-4"&gt;今日投资配比&lt;/h2&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>&lt;div class="w-full max-w-[240px] aspect-square relative flex items-center justify-center"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>&lt;canvas id="pieChart"&gt;&lt;/canvas&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>&lt;div v-if="totalHours === 0" class="absolute text-slate-400 text-sm"&gt;暂无投资数据&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;/div&gt;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;!-- 历史收益趋势图 --&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>&lt;h2 class="text-lg font-bold text-slate-700 mb-4"&gt;近7天收益趋势 (元)&lt;/h2&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>&lt;div class="w-full h-48"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>&lt;canvas id="trendChart"&gt;&lt;/canvas&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;/div&gt;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;/main&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;/div&gt;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;script&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>const { createApp, ref, computed, onMounted, watch } = Vue;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">        </span>createApp({</p>
+<p class="p1"><span class="Apple-converted-space">            </span>setup() {</p>
+<p class="p1"><span class="Apple-converted-space">                </span>// 默认分类与颜色</p>
+<p class="p1"><span class="Apple-converted-space">                </span>const categories = {</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>work: { name: '工作/事业', color: 'bg-indigo-500', hex: '#6366f1' },</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>study: { name: '学习/成长', color: 'bg-emerald-500', hex: '#10b981' },</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>health: { name: '健康/运动', color: 'bg-rose-500', hex: '#f43f5e' },</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>relation: { name: '人际关系', color: 'bg-sky-500', hex: '#0ea5e9' },</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>entertainment: { name: '娱乐/休息', color: 'bg-amber-500', hex: '#f59e0b' },</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>custom: { name: '自定义分类', color: 'bg-purple-500', hex: '#a855f7' }</p>
+<p class="p1"><span class="Apple-converted-space">                </span>};</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">                </span>// 初始化当前日期（格式：YYYY-MM-DD）</p>
+<p class="p1"><span class="Apple-converted-space">                </span>const getTodayString = () =&gt; {</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>const d = new Date();</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>return d.toISOString().split('T')[0];</p>
+<p class="p1"><span class="Apple-converted-space">                </span>};</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">                </span>const selectedDate = ref(getTodayString());</p>
+<p class="p2"><span class="Apple-converted-space">                </span></p>
+<p class="p1"><span class="Apple-converted-space">                </span>// 输入的数据绑定</p>
+<p class="p1"><span class="Apple-converted-space">                </span>const inputs = ref({</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>work: 0,</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>study: 0,</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>health: 0,</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>relation: 0,</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>entertainment: 0,</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>custom: 0</p>
+<p class="p1"><span class="Apple-converted-space">                </span>});</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">                </span>// 核心计算属性</p>
+<p class="p1"><span class="Apple-converted-space">                </span>const totalHours = computed(() =&gt; {</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>return Object.values(inputs.value).reduce((sum, val) =&gt; sum + (Number(val) || 0), 0);</p>
+<p class="p1"><span class="Apple-converted-space">                </span>});</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">                </span>const totalRevenue = computed(() =&gt; {</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>return Math.round(totalHours.value * 100);</p>
+<p class="p1"><span class="Apple-converted-space">                </span>});</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">                </span>const remainingHours = computed(() =&gt; {</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>return 24 - totalHours.value;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>});</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">                </span>const remainingRevenue = computed(() =&gt; {</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>return Math.round(remainingHours.value * 100);</p>
+<p class="p1"><span class="Apple-converted-space">                </span>});</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">                </span>// 本地存储管理</p>
+<p class="p1"><span class="Apple-converted-space">                </span>const loadDateData = () =&gt; {</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>const localData = localStorage.getItem('time_investment_data');</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>const allData = localData ? JSON.parse(localData) : {};</p>
+<p class="p2"><span class="Apple-converted-space">                    </span></p>
+<p class="p1"><span class="Apple-converted-space">                    </span>if (allData[selectedDate.value]) {</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>inputs.value = { ...allData[selectedDate.value] };</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>} else {</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>// 默认新的一天全清空</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>inputs.value = { work: 0, study: 0, health: 0, relation: 0, entertainment: 0, custom: 0 };</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>}</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>updateCharts();</p>
+<p class="p1"><span class="Apple-converted-space">                </span>};</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">                </span>const validateAndSave = () =&gt; {</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>// 防止负数</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>for (const key in inputs.value) {</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>if (inputs.value[key] &lt; 0) inputs.value[key] = 0;</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>}</p>
+<p class="p2"><span class="Apple-converted-space">                    </span></p>
+<p class="p1"><span class="Apple-converted-space">                    </span>const localData = localStorage.getItem('time_investment_data');</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>const allData = localData ? JSON.parse(localData) : {};</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>allData[selectedDate.value] = { ...inputs.value };</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>localStorage.setItem('time_investment_data', JSON.stringify(allData));</p>
+<p class="p2"><span class="Apple-converted-space">                    </span></p>
+<p class="p1"><span class="Apple-converted-space">                    </span>updateCharts();</p>
+<p class="p1"><span class="Apple-converted-space">                </span>};</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">                </span>const resetCurrentDay = () =&gt; {</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>inputs.value = { work: 0, study: 0, health: 0, relation: 0, entertainment: 0, custom: 0 };</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>validateAndSave();</p>
+<p class="p1"><span class="Apple-converted-space">                </span>};</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">                </span>const setToToday = () =&gt; {</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>selectedDate.value = getTodayString();</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>loadDateData();</p>
+<p class="p1"><span class="Apple-converted-space">                </span>};</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">                </span>// 图表实例引用</p>
+<p class="p1"><span class="Apple-converted-space">                </span>let pieChartInstance = null;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>let trendChartInstance = null;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">                </span>// 初始化和更新图表</p>
+<p class="p1"><span class="Apple-converted-space">                </span>const updateCharts = () =&gt; {</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>// 1. 更新饼图</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>const pieCtx = document.getElementById('pieChart').getContext('2d');</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>const pieData = Object.keys(categories).map(key =&gt; inputs.value[key] || 0);</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>const pieColors = Object.values(categories).map(cat =&gt; cat.hex);</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>const labels = Object.values(categories).map(cat =&gt; cat.name);</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">                    </span>if (pieChartInstance) pieChartInstance.destroy();</p>
+<p class="p2"><span class="Apple-converted-space">                    </span></p>
+<p class="p1"><span class="Apple-converted-space">                    </span>if (totalHours.value &gt; 0) {</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>pieChartInstance = new Chart(pieCtx, {</p>
+<p class="p1"><span class="Apple-converted-space">                            </span>type: 'doughnut',</p>
+<p class="p1"><span class="Apple-converted-space">                            </span>data: {</p>
+<p class="p1"><span class="Apple-converted-space">                                </span>labels: labels,</p>
+<p class="p1"><span class="Apple-converted-space">                                </span>datasets: [{</p>
+<p class="p1"><span class="Apple-converted-space">                                    </span>data: pieData,</p>
+<p class="p1"><span class="Apple-converted-space">                                    </span>backgroundColor: pieColors,</p>
+<p class="p1"><span class="Apple-converted-space">                                    </span>borderWidth: 0</p>
+<p class="p1"><span class="Apple-converted-space">                                </span>}]</p>
+<p class="p1"><span class="Apple-converted-space">                            </span>},</p>
+<p class="p1"><span class="Apple-converted-space">                            </span>options: {</p>
+<p class="p1"><span class="Apple-converted-space">                                </span>responsive: true,</p>
+<p class="p1"><span class="Apple-converted-space">                                </span>plugins: { legend: { display: false } },</p>
+<p class="p1"><span class="Apple-converted-space">                                </span>cutout: '70%'</p>
+<p class="p1"><span class="Apple-converted-space">                            </span>}</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>});</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">                    </span>// 2. 更新近7天趋势图</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>const trendCtx = document.getElementById('trendChart').getContext('2d');</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>const localData = localStorage.getItem('time_investment_data');</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>const allData = localData ? JSON.parse(localData) : {};</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">                    </span>// 获取过去7天的日期</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>const labelsTrend = [];</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>const dataTrend = [];</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>for (let i = 6; i &gt;= 0; i--) {</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>const d = new Date();</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>d.setDate(d.getDate() - i);</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>const dateStr = d.toISOString().split('T')[0];</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>// 转换标签为 MM-DD 格式便于移动端显示</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>labelsTrend.push(dateStr.slice(5));<span class="Apple-converted-space"> </span></p>
+<p class="p2"><span class="Apple-converted-space">                        </span></p>
+<p class="p1"><span class="Apple-converted-space">                        </span>const dayData = allData[dateStr] || {};</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>const dayHours = Object.values(dayData).reduce((sum, val) =&gt; sum + (Number(val) || 0), 0);</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>dataTrend.push(dayHours * 100);</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">                    </span>if (trendChartInstance) trendChartInstance.destroy();</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>trendChartInstance = new Chart(trendCtx, {</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>type: 'bar',</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>data: {</p>
+<p class="p1"><span class="Apple-converted-space">                            </span>labels: labelsTrend,</p>
+<p class="p1"><span class="Apple-converted-space">                            </span>datasets: [{</p>
+<p class="p1"><span class="Apple-converted-space">                                </span>label: '日收益 (元)',</p>
+<p class="p1"><span class="Apple-converted-space">                                </span>data: dataTrend,</p>
+<p class="p1"><span class="Apple-converted-space">                                </span>backgroundColor: 'rgba(16, 185, 129, 0.8)',</p>
+<p class="p1"><span class="Apple-converted-space">                                </span>borderRadius: 6</p>
+<p class="p1"><span class="Apple-converted-space">                            </span>}]</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>},</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>options: {</p>
+<p class="p1"><span class="Apple-converted-space">                            </span>responsive: true,</p>
+<p class="p1"><span class="Apple-converted-space">                            </span>maintainAspectRatio: false,</p>
+<p class="p1"><span class="Apple-converted-space">                            </span>plugins: { legend: { display: false } },</p>
+<p class="p1"><span class="Apple-converted-space">                            </span>scales: {</p>
+<p class="p1"><span class="Apple-converted-space">                                </span>y: { beginAtZero: true, max: 2400 }</p>
+<p class="p1"><span class="Apple-converted-space">                            </span>}</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>}</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>});</p>
+<p class="p1"><span class="Apple-converted-space">                </span>};</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">                </span>// 生成演示用的历史数据（仅在本地完全无数据时触发，方便初次查看效果）</p>
+<p class="p1"><span class="Apple-converted-space">                </span>const generateMockData = () =&gt; {</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>const localData = localStorage.getItem('time_investment_data');</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>if (!localData || localData === '{}') {</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>const mock = {};</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>for (let i = 10; i &gt;= 0; i--) {</p>
+<p class="p1"><span class="Apple-converted-space">                            </span>const d = new Date();</p>
+<p class="p1"><span class="Apple-converted-space">                            </span>d.setDate(d.getDate() - i);</p>
+<p class="p1"><span class="Apple-converted-space">                            </span>const dateStr = d.toISOString().split('T')[0];</p>
+<p class="p1"><span class="Apple-converted-space">                            </span>mock[dateStr] = {</p>
+<p class="p1"><span class="Apple-converted-space">                                </span>work: Math.round((Math.random() * 6 + 4) * 2) / 2,</p>
+<p class="p1"><span class="Apple-converted-space">                                </span>study: Math.round((Math.random() * 2 + 1) * 2) / 2,</p>
+<p class="p1"><span class="Apple-converted-space">                                </span>health: Math.round((Math.random() * 1 + 0.5) * 2) / 2,</p>
+<p class="p1"><span class="Apple-converted-space">                                </span>relation: Math.round((Math.random() * 2) * 2) / 2,</p>
+<p class="p1"><span class="Apple-converted-space">                                </span>entertainment: Math.round((Math.random() * 3 + 1) * 2) / 2,</p>
+<p class="p1"><span class="Apple-converted-space">                                </span>custom: 0</p>
+<p class="p1"><span class="Apple-converted-space">                            </span>};</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>}</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>localStorage.setItem('time_investment_data', JSON.stringify(mock));</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>}</p>
+<p class="p1"><span class="Apple-converted-space">                </span>};</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">                </span>onMounted(() =&gt; {</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>generateMockData();</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>loadDateData();</p>
+<p class="p1"><span class="Apple-converted-space">                </span>});</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">                </span>return {</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>categories,</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>selectedDate,</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>inputs,</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>totalHours,</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>totalRevenue,</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>remainingHours,</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>remainingRevenue,</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>loadDateData,</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>validateAndSave,</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>resetCurrentDay,</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>setToToday</p>
+<p class="p1"><span class="Apple-converted-space">                </span>};</p>
+<p class="p1"><span class="Apple-converted-space">            </span>}</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}).mount('#app');</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;/script&gt;</p>
+<p class="p1">&lt;/body&gt;</p>
+<p class="p1">&lt;/html&gt;</p>
+</body>
+</html>
