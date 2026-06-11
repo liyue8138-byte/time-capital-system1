@@ -1,0 +1,675 @@
+
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+.app{padding:1rem 0;font-family:var(--font-sans)}
+
+/* Morandi palette */
+:root{
+  --m-sage:#A8B5A2;--m-sage-light:#D4DDD1;--m-sage-dim:#7A9173;
+  --m-clay:#C4A882;--m-clay-light:#E2D4C0;--m-clay-dim:#9E8060;
+  --m-slate:#9BAAB4;--m-slate-light:#D0D9E0;--m-slate-dim:#6F8896;
+  --m-blush:#C9A9A6;--m-blush-light:#E8D5D3;--m-blush-dim:#A07B78;
+  --m-mauve:#B5A8C0;--m-mauve-light:#DDD6E8;--m-mauve-dim:#8A7A9B;
+  --m-sand:#C8B89A;--m-sand-light:#E5DBCC;--m-sand-dim:#A08C6E;
+}
+
+.tabs{display:flex;gap:6px;margin-bottom:1.25rem;flex-wrap:wrap}
+.tab{padding:6px 14px;border-radius:8px;border:0.5px solid var(--color-border-secondary);background:transparent;color:var(--color-text-secondary);font-size:13px;cursor:pointer;transition:all .15s}
+.tab.active{background:var(--color-background-secondary);color:var(--color-text-primary);border-color:var(--color-border-primary);font-weight:500}
+.section{display:none}.section.active{display:block}
+
+/* Calendar */
+.cal-nav{display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem}
+.cal-title{font-size:16px;font-weight:500;color:var(--color-text-primary)}
+.cal-arrow{background:none;border:0.5px solid var(--color-border-secondary);border-radius:8px;width:32px;height:32px;cursor:pointer;color:var(--color-text-secondary);font-size:16px;display:flex;align-items:center;justify-content:center}
+.cal-arrow:hover{background:var(--color-background-secondary)}
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px}
+.cal-dow{text-align:center;font-size:11px;color:var(--color-text-tertiary);padding:4px 0;font-weight:500}
+.cal-day{border-radius:8px;padding:6px 4px;min-height:64px;cursor:pointer;border:0.5px solid transparent;transition:border-color .15s;position:relative;display:flex;flex-direction:column;gap:2px}
+.cal-day:hover{border-color:var(--color-border-secondary)}
+.cal-day.today .day-num{background:#A8B5A2;color:#fff;border-radius:50%;width:20px;height:20px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:500}
+.cal-day.selected{border-color:#9BAAB4;border-width:1.5px}
+.cal-day.other-month .day-num{color:var(--color-text-tertiary)}
+.day-num{font-size:12px;color:var(--color-text-secondary);width:20px;height:20px;display:flex;align-items:center;justify-content:center}
+.day-dot-row{display:flex;flex-wrap:wrap;gap:2px;margin-top:2px}
+.day-dot{width:6px;height:6px;border-radius:50%}
+.day-amt{font-size:10px;font-weight:500;margin-top:auto}
+
+/* selected day panel */
+.day-panel{background:var(--color-background-primary);border:0.5px solid var(--color-border-tertiary);border-radius:12px;padding:1rem 1.25rem;margin-top:1rem}
+.panel-header{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:12px}
+.panel-date{font-size:15px;font-weight:500;color:var(--color-text-primary)}
+.panel-score{font-size:13px;padding:3px 10px;border-radius:10px}
+
+.cat-row{display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:0.5px solid var(--color-border-tertiary)}
+.cat-row:last-child{border-bottom:none}
+.dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.cat-label{font-size:13px;color:var(--color-text-primary);flex:1}
+.bar-bg{flex:2;height:5px;background:var(--color-background-secondary);border-radius:3px;overflow:hidden}
+.bar-fill{height:100%;border-radius:3px}
+.cat-val{font-size:13px;font-weight:500;color:var(--color-text-primary);min-width:40px;text-align:right}
+.cat-roi{font-size:11px;min-width:52px;text-align:right;color:var(--color-text-secondary)}
+
+/* quick log in day panel */
+.log-row{display:flex;gap:8px;margin-top:10px}
+.log-row select,.log-row input{flex:1}
+.log-row button{flex-shrink:0}
+
+/* metric grid */
+.mgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:8px;margin-bottom:1rem}
+.mc{background:var(--color-background-secondary);border-radius:8px;padding:10px 12px}
+.mc-l{font-size:11px;color:var(--color-text-secondary);margin-bottom:3px}
+.mc-v{font-size:20px;font-weight:500;color:var(--color-text-primary)}
+.mc-s{font-size:11px;color:var(--color-text-tertiary);margin-top:1px}
+
+/* month summary bar */
+.month-bar-wrap{margin:10px 0 4px}
+.month-bar-bg{width:100%;height:8px;background:var(--color-background-secondary);border-radius:4px;overflow:hidden;display:flex}
+.month-bar-seg{height:100%}
+
+/* entry list */
+.entry-list{max-height:180px;overflow-y:auto}
+.e-item{display:flex;align-items:center;gap:7px;padding:7px 0;border-bottom:0.5px solid var(--color-border-tertiary);font-size:13px}
+.e-item:last-child{border-bottom:none}
+.e-del{margin-left:auto;background:none;border:none;color:var(--color-text-tertiary);cursor:pointer;font-size:16px;line-height:1;padding:0 2px}
+.e-del:hover{color:#C9A9A6}
+
+/* ROI score styles */
+.score-s{background:#D4DDD1;color:#4A6344}
+.score-a{background:#D0D9E0;color:#3A5A6A}
+.score-b{background:#E2D4C0;color:#7A5A30}
+.score-c{background:#E8D5D3;color:#8A4A47}
+.score-empty{background:var(--color-background-secondary);color:var(--color-text-tertiary)}
+
+/* heatmap */
+.hmap-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:3px;margin-top:8px}
+.hmap-cell{height:28px;border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:10px;cursor:pointer}
+.hmap-label{font-size:11px;color:var(--color-text-tertiary);text-align:center;padding:2px 0}
+</style>
+
+<div class="app">
+<h2 style="position:absolute;width:1px;height:1px;overflow:hidden">时间投资日历系统</h2>
+
+<div style="display:flex;align-items:baseline;gap:10px;margin-bottom:1.25rem">
+  <span style="font-size:20px;font-weight:500;color:var(--color-text-primary)">时间投资营收系统</span>
+  <span style="font-size:12px;color:var(--color-text-tertiary)">每日资产 ¥<span id="hdr-budget">2400</span></span>
+</div>
+
+<div class="tabs">
+  <button class="tab active" onclick="sw('calendar')"><i class="ti ti-calendar" aria-hidden="true"></i> 日历</button>
+  <button class="tab" onclick="sw('today')"><i class="ti ti-clock" aria-hidden="true"></i> 今日记录</button>
+  <button class="tab" onclick="sw('analysis')"><i class="ti ti-chart-bar" aria-hidden="true"></i> 投资分析</button>
+  <button class="tab" onclick="sw('history')"><i class="ti ti-trending-up" aria-hidden="true"></i> 趋势</button>
+  <button class="tab" onclick="sw('settings')"><i class="ti ti-settings" aria-hidden="true"></i> 设置</button>
+</div>
+
+<!-- CALENDAR -->
+<div id="sec-calendar" class="section active">
+  <div class="cal-nav">
+    <button class="cal-arrow" onclick="changeMonth(-1)" aria-label="上月"><i class="ti ti-chevron-left" aria-hidden="true"></i></button>
+    <div>
+      <div class="cal-title" id="cal-title"></div>
+      <div style="font-size:11px;color:var(--color-text-tertiary);text-align:center" id="cal-month-stats"></div>
+    </div>
+    <button class="cal-arrow" onclick="changeMonth(1)" aria-label="下月"><i class="ti ti-chevron-right" aria-hidden="true"></i></button>
+  </div>
+
+  <div class="cal-grid" id="cal-dow-row"></div>
+  <div class="cal-grid" id="cal-grid" style="margin-top:4px"></div>
+
+  <div class="month-bar-wrap" id="month-bar-wrap" style="display:none">
+    <div style="font-size:11px;color:var(--color-text-tertiary);margin-bottom:4px">本月分类分布</div>
+    <div class="month-bar-bg" id="month-bar"></div>
+    <div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:6px;font-size:11px;color:var(--color-text-secondary)" id="month-bar-legend"></div>
+  </div>
+
+  <div id="day-panel-wrap"></div>
+</div>
+
+<!-- TODAY -->
+<div id="sec-today" class="section">
+  <div class="mgrid" id="today-metrics"></div>
+  <div style="background:var(--color-background-primary);border:0.5px solid var(--color-border-tertiary);border-radius:12px;padding:1rem 1.25rem;margin-bottom:1rem">
+    <div style="font-size:14px;font-weight:500;margin-bottom:10px;color:var(--color-text-primary)">添加时间记录</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px">
+      <select id="t-cat"></select>
+      <input type="number" id="t-hours" min="0.5" max="24" step="0.5" placeholder="小时数" />
+    </div>
+    <input type="text" id="t-note" placeholder="备注（可选）" style="width:100%;margin-bottom:8px" />
+    <button style="width:100%" onclick="addFromToday()"><i class="ti ti-plus" aria-hidden="true"></i> 记录 ↗</button>
+  </div>
+  <div style="background:var(--color-background-primary);border:0.5px solid var(--color-border-tertiary);border-radius:12px;padding:1rem 1.25rem">
+    <div style="font-size:14px;font-weight:500;margin-bottom:10px;color:var(--color-text-primary)">今日明细</div>
+    <div class="entry-list" id="today-entries"></div>
+  </div>
+</div>
+
+<!-- ANALYSIS -->
+<div id="sec-analysis" class="section">
+  <div class="mgrid" id="analysis-metrics"></div>
+  <div style="background:var(--color-background-primary);border:0.5px solid var(--color-border-tertiary);border-radius:12px;padding:1rem 1.25rem;margin-bottom:1rem">
+    <div style="font-size:14px;font-weight:500;margin-bottom:12px;color:var(--color-text-primary)">各领域累计投入</div>
+    <div id="analysis-bars"></div>
+  </div>
+  <div style="background:var(--color-background-primary);border:0.5px solid var(--color-border-tertiary);border-radius:12px;padding:1rem 1.25rem;margin-bottom:1rem">
+    <div style="font-size:14px;font-weight:500;margin-bottom:10px;color:var(--color-text-primary)">量化收益预期</div>
+    <div id="roi-detail"></div>
+  </div>
+  <button onclick="sendPrompt('根据我的时间投资数据，帮我分析哪些领域回报最大，给出具体建议')">获取 AI 深度分析 ↗</button>
+</div>
+
+<!-- HISTORY / HEATMAP -->
+<div id="sec-history" class="section">
+  <div class="mgrid" id="history-metrics"></div>
+  <div style="background:var(--color-background-primary);border:0.5px solid var(--color-border-tertiary);border-radius:12px;padding:1rem 1.25rem;margin-bottom:1rem">
+    <div style="font-size:14px;font-weight:500;margin-bottom:4px;color:var(--color-text-primary)">投入热力图（近90天）</div>
+    <div style="font-size:11px;color:var(--color-text-tertiary);margin-bottom:10px">颜色深浅 = 当日投入金额</div>
+    <div id="hmap-dow" style="display:grid;grid-template-columns:repeat(7,1fr);gap:3px;margin-bottom:2px"></div>
+    <div class="hmap-grid" id="hmap"></div>
+    <div style="display:flex;align-items:center;gap:6px;margin-top:8px;font-size:11px;color:var(--color-text-tertiary)">
+      <span>少</span>
+      <div style="width:14px;height:14px;border-radius:3px;background:#E8D5D3"></div>
+      <div style="width:14px;height:14px;border-radius:3px;background:#C9A9A6"></div>
+      <div style="width:14px;height:14px;border-radius:3px;background:#A8B5A2"></div>
+      <div style="width:14px;height:14px;border-radius:3px;background:#9BAAB4"></div>
+      <span>多</span>
+    </div>
+  </div>
+  <div style="background:var(--color-background-primary);border:0.5px solid var(--color-border-tertiary);border-radius:12px;padding:1rem 1.25rem">
+    <div style="font-size:14px;font-weight:500;margin-bottom:8px;color:var(--color-text-primary)">近30天趋势</div>
+    <div style="position:relative;width:100%;height:200px"><canvas id="trend-chart" role="img" aria-label="近30天时间投入趋势折线图">趋势图</canvas></div>
+  </div>
+</div>
+
+<!-- SETTINGS -->
+<div id="sec-settings" class="section">
+  <div style="background:var(--color-background-primary);border:0.5px solid var(--color-border-tertiary);border-radius:12px;padding:1rem 1.25rem;margin-bottom:1rem">
+    <div style="font-size:14px;font-weight:500;margin-bottom:12px;color:var(--color-text-primary)">分类管理</div>
+    <div id="cat-list"></div>
+    <div style="margin-top:12px;font-size:12px;color:var(--color-text-secondary);margin-bottom:6px">添加自定义分类</div>
+    <div style="display:flex;gap:8px">
+      <input type="text" id="new-cat-name" placeholder="分类名称" style="flex:1" />
+      <input type="color" id="new-cat-color" value="#A8B5A2" style="width:38px;padding:2px" />
+      <button onclick="addCat()">添加</button>
+    </div>
+  </div>
+  <div style="background:var(--color-background-primary);border:0.5px solid var(--color-border-tertiary);border-radius:12px;padding:1rem 1.25rem;margin-bottom:1rem">
+    <div style="font-size:14px;font-weight:500;margin-bottom:10px;color:var(--color-text-primary)">每日资产</div>
+    <div style="display:flex;align-items:center;gap:10px">
+      <label style="font-size:13px;color:var(--color-text-secondary)">每日总资产（元）</label>
+      <input type="number" id="set-budget" value="2400" min="100" step="100" style="width:90px" onchange="saveBudget()" />
+    </div>
+    <div style="font-size:12px;color:var(--color-text-tertiary);margin-top:6px">1小时 = ¥<span id="set-hour-val">100</span></div>
+  </div>
+  <div style="background:var(--color-background-primary);border:0.5px solid var(--color-border-tertiary);border-radius:12px;padding:1rem 1.25rem">
+    <div style="font-size:14px;font-weight:500;margin-bottom:10px;color:var(--color-text-primary)">数据管理</div>
+    <button onclick="resetToday()" style="margin-right:8px">清空今日</button>
+    <button onclick="resetAll()">清空全部</button>
+  </div>
+</div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<script>
+const DEF_CATS = [
+  {id:'work',  name:'工作/事业', color:'#9BAAB4', roi:'高回报', roiClass:'roi-high', roiDesc:'直接变现，技能复利'},
+  {id:'learn', name:'学习/成长', color:'#A8B5A2', roi:'高回报', roiClass:'roi-high', roiDesc:'知识积累，长期复利'},
+  {id:'health',name:'健康/运动', color:'#C8B89A', roi:'中长期', roiClass:'roi-mid',  roiDesc:'精力资本，基础保障'},
+  {id:'social',name:'人际关系', color:'#C9A9A6', roi:'中期',   roiClass:'roi-mid',  roiDesc:'机会网络，情感资本'},
+  {id:'rest',  name:'娱乐/休息', color:'#B5A8C0', roi:'必要',  roiClass:'roi-low',  roiDesc:'恢复精力，维持运转'},
+];
+const ROI_MULT = {work:1.8, learn:1.6, health:1.3, social:1.2, rest:0.8};
+
+function ld(k,d){try{const v=localStorage.getItem(k);return v?JSON.parse(v):d}catch{return d}}
+function sv(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch{}}
+
+let cats = ld('tc_cats', DEF_CATS);
+let budget = ld('tc_budget', 2400);
+let allData = ld('tc_data', {});
+let calYear, calMonth, selDate;
+let tChart = null;
+
+const today = new Date();
+calYear = today.getFullYear();
+calMonth = today.getMonth();
+selDate = fmt(today);
+
+function fmt(d){return d.toISOString().slice(0,10)}
+function fmtD(s){const[y,m,d]=s.split('-');return `${y}年${m}月${d}日`}
+function todayStr(){return fmt(today)}
+function h2a(h){return Math.round(h*(budget/24))}
+function getCat(id){return cats.find(c=>c.id===id)||{name:id,color:'#B4B2A9',roi:'—',roiClass:'roi-low',roiDesc:'—'}}
+function entries(date){return allData[date]||[]}
+function dayTotal(date){return entries(date).reduce((s,e)=>s+e.hours,0)}
+function dayAmt(date){return h2a(dayTotal(date))}
+
+function scoreDay(date){
+  const es = entries(date);
+  if(!es.length) return null;
+  const totalH = es.reduce((s,e)=>s+e.hours,0);
+  let weighted = 0;
+  es.forEach(e=>{
+    const m = ROI_MULT[e.cat]||1.0;
+    weighted += (e.hours/totalH)*m;
+  });
+  const pct = Math.min(1, totalH/8);
+  const score = weighted * pct;
+  if(score>=1.4) return {label:'S',cls:'score-s',tip:'卓越投资日'};
+  if(score>=1.1) return {label:'A',cls:'score-a',tip:'高效投资日'};
+  if(score>=0.85) return {label:'B',cls:'score-b',tip:'稳健投资日'};
+  return {label:'C',cls:'score-c',tip:'轻度投资日'};
+}
+
+function sw(tab){
+  document.querySelectorAll('.tab').forEach((t,i)=>{
+    const names=['calendar','today','analysis','history','settings'];
+    t.classList.toggle('active', names[i]===tab);
+  });
+  document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
+  document.getElementById('sec-'+tab).classList.add('active');
+  if(tab==='today') renderToday();
+  if(tab==='analysis') renderAnalysis();
+  if(tab==='history') renderHistory();
+  if(tab==='settings') renderSettings();
+}
+
+function changeMonth(d){
+  calMonth+=d;
+  if(calMonth>11){calMonth=0;calYear++}
+  if(calMonth<0){calMonth=11;calYear--}
+  renderCal();
+}
+
+function renderCal(){
+  const DOWS=['一','二','三','四','五','六','日'];
+  document.getElementById('cal-dow-row').innerHTML = DOWS.map(d=>`<div class="cal-dow">${d}</div>`).join('');
+  document.getElementById('cal-title').textContent = `${calYear}年${calMonth+1}月`;
+
+  const first = new Date(calYear, calMonth, 1);
+  let startDow = first.getDay();
+  startDow = startDow===0?6:startDow-1;
+
+  const daysInMonth = new Date(calYear, calMonth+1, 0).getDate();
+  const daysInPrev = new Date(calYear, calMonth, 0).getDate();
+
+  let cells = [];
+  for(let i=startDow-1;i>=0;i--) cells.push({day:daysInPrev-i,cur:false});
+  for(let d=1;d<=daysInMonth;d++) cells.push({day:d,cur:true});
+  let next=1;
+  while(cells.length%7!==0) cells.push({day:next++,cur:false});
+
+  const todayS = todayStr();
+  let html='';
+  cells.forEach(c=>{
+    const mo = calMonth+(c.cur?0:(cells.indexOf(c)<7?-1:1));
+    const yr = calYear + (mo<0?-1:mo>11?1:0);
+    const mN = ((mo%12)+12)%12;
+    const dateS = `${yr}-${String(mN+1).padStart(2,'0')}-${String(c.day).padStart(2,'0')}`;
+    const isToday = dateS===todayS;
+    const isSel = dateS===selDate;
+    const amt = dayAmt(dateS);
+    const sc = scoreDay(dateS);
+    const es = entries(dateS);
+
+    const catTotals={};
+    es.forEach(e=>{catTotals[e.cat]=(catTotals[e.cat]||0)+e.hours});
+
+    const dots = Object.entries(catTotals).slice(0,4).map(([cid])=>{
+      const cat=getCat(cid);
+      return `<div class="day-dot" style="background:${cat.color}"></div>`;
+    }).join('');
+
+    const amtColor = amt>=1200?'#7A9173':amt>=600?'#9BAAB4':amt>0?'#B4B2A9':'transparent';
+
+    html+=`<div class="cal-day${c.cur?'':' other-month'}${isToday?' today':''}${isSel?' selected':''}" onclick="selectDay('${dateS}')">
+      <div style="display:flex;align-items:center;justify-content:space-between">
+        <div class="day-num">${c.day}</div>
+        ${sc?`<div style="font-size:9px;font-weight:500;padding:1px 5px;border-radius:8px" class="${sc.cls}">${sc.label}</div>`:''}
+      </div>
+      <div class="day-dot-row">${dots}</div>
+      ${amt>0?`<div class="day-amt" style="color:${amtColor}">¥${amt}</div>`:''}
+    </div>`;
+  });
+  document.getElementById('cal-grid').innerHTML=html;
+
+  const monthEntries=[];
+  for(let d=1;d<=daysInMonth;d++){
+    const ds=`${calYear}-${String(calMonth+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+    (allData[ds]||[]).forEach(e=>monthEntries.push(e));
+  }
+  const monthAmt=h2a(monthEntries.reduce((s,e)=>s+e.hours,0));
+  const activeDays=[...new Set(Object.keys(allData).filter(k=>k.startsWith(`${calYear}-${String(calMonth+1).padStart(2,'0')}`)))].length;
+  document.getElementById('cal-month-stats').textContent=monthAmt>0?`本月已投入 ¥${monthAmt}，${activeDays}天有记录`:'本月暂无记录';
+
+  if(monthEntries.length>0){
+    const catTotals={};
+    monthEntries.forEach(e=>{catTotals[e.cat]=(catTotals[e.cat]||0)+e.hours});
+    const total=Object.values(catTotals).reduce((s,v)=>s+v,0);
+    const segs=Object.entries(catTotals).sort((a,b)=>b[1]-a[1]);
+    document.getElementById('month-bar').innerHTML=segs.map(([cid,h])=>{
+      const cat=getCat(cid);
+      return `<div class="month-bar-seg" style="width:${Math.round((h/total)*100)}%;background:${cat.color}"></div>`;
+    }).join('');
+    document.getElementById('month-bar-legend').innerHTML=segs.map(([cid,h])=>{
+      const cat=getCat(cid);
+      return `<span style="display:flex;align-items:center;gap:4px"><span style="width:8px;height:8px;border-radius:50%;background:${cat.color}"></span>${cat.name} ${Math.round((h/total)*100)}%</span>`;
+    }).join('');
+    document.getElementById('month-bar-wrap').style.display='block';
+  } else {
+    document.getElementById('month-bar-wrap').style.display='none';
+  }
+
+  renderDayPanel(selDate);
+}
+
+function selectDay(ds){
+  selDate=ds;
+  renderCal();
+}
+
+function renderDayPanel(ds){
+  const es=entries(ds);
+  const sc=scoreDay(ds);
+  const totalH=es.reduce((s,e)=>s+e.hours,0);
+  const amt=h2a(totalH);
+  const isToday=ds===todayStr();
+
+  let html=`<div class="day-panel">
+    <div class="panel-header">
+      <div class="panel-date">${fmtD(ds)}${isToday?' <span style="font-size:12px;color:#A8B5A2">今天</span>':''}</div>
+      ${sc?`<span class="panel-score ${sc.cls}">${sc.label} · ${sc.tip}</span>`:'<span class="panel-score score-empty">暂无记录</span>'}
+    </div>`;
+
+  if(es.length>0){
+    const catTotals={};
+    es.forEach(e=>{catTotals[e.cat]=(catTotals[e.cat]||0)+e.hours});
+    const maxH=Math.max(...Object.values(catTotals));
+    html+=`<div style="margin-bottom:10px">`;
+    Object.entries(catTotals).sort((a,b)=>b[1]-a[1]).forEach(([cid,h])=>{
+      const cat=getCat(cid);
+      const a=h2a(h);
+      const mult=ROI_MULT[cid]||1.0;
+      const projected=Math.round(a*mult);
+      html+=`<div class="cat-row">
+        <div class="dot" style="background:${cat.color}"></div>
+        <div class="cat-label">${cat.name}</div>
+        <div class="bar-bg"><div class="bar-fill" style="width:${Math.round((h/maxH)*100)}%;background:${cat.color}"></div></div>
+        <div class="cat-val">¥${a}</div>
+        <div class="cat-roi">→ ¥${projected}</div>
+      </div>`;
+    });
+    html+=`</div>`;
+    html+=`<div style="display:flex;justify-content:space-between;font-size:12px;color:var(--color-text-secondary);padding:6px 0;border-top:0.5px solid var(--color-border-tertiary)">
+      <span>投入 <span style="font-weight:500;color:var(--color-text-primary)">¥${amt}</span>（${totalH.toFixed(1)}h）</span>
+      <span>预期收益 <span style="font-weight:500;color:#7A9173">¥${Math.round(es.reduce((s,e)=>{const a=h2a(e.hours);const m=ROI_MULT[e.cat]||1;return s+a*m},0))}</span></span>
+    </div>`;
+  } else {
+    html+=`<div style="text-align:center;padding:1rem;color:var(--color-text-tertiary);font-size:13px">这天没有记录</div>`;
+  }
+
+  html+=`<div class="log-row">
+    <select id="dp-cat">${cats.map(c=>`<option value="${c.id}">${c.name}</option>`).join('')}</select>
+    <input type="number" id="dp-h" min="0.5" max="24" step="0.5" placeholder="小时" style="max-width:80px" />
+    <button onclick="addFromPanel('${ds}')"><i class="ti ti-plus" aria-hidden="true"></i></button>
+  </div>`;
+
+  if(es.length>0){
+    html+=`<div class="entry-list" style="margin-top:8px">`;
+    [...es].reverse().forEach((e,ri)=>{
+      const i=es.length-1-ri;
+      const cat=getCat(e.cat);
+      html+=`<div class="e-item">
+        <div class="dot" style="background:${cat.color}"></div>
+        <span style="color:var(--color-text-primary)">${cat.name}</span>
+        <span style="color:var(--color-text-secondary)">${e.hours}h</span>
+        <span style="font-weight:500;color:var(--color-text-primary)">¥${h2a(e.hours)}</span>
+        ${e.note?`<span style="color:var(--color-text-tertiary);font-size:12px">${e.note}</span>`:''}
+        <button class="e-del" onclick="delEntry('${ds}',${i})" aria-label="删除">×</button>
+      </div>`;
+    });
+    html+=`</div>`;
+  }
+  html+=`</div>`;
+  document.getElementById('day-panel-wrap').innerHTML=html;
+}
+
+function addFromPanel(ds){
+  const cat=document.getElementById('dp-cat').value;
+  const h=parseFloat(document.getElementById('dp-h').value);
+  if(!cat||isNaN(h)||h<=0) return;
+  if(!allData[ds]) allData[ds]=[];
+  allData[ds].push({cat,hours:h,note:'',time:Date.now()});
+  sv('tc_data',allData);
+  document.getElementById('dp-h').value='';
+  renderCal();
+}
+
+function delEntry(ds,i){
+  if(allData[ds]) allData[ds].splice(i,1);
+  sv('tc_data',allData);
+  renderCal();
+  if(document.getElementById('sec-today').classList.contains('active')) renderToday();
+}
+
+function renderToday(){
+  const ds=todayStr();
+  const es=entries(ds);
+  const totalH=es.reduce((s,e)=>s+e.hours,0);
+  const amt=h2a(totalH);
+  const pct=Math.min(100,Math.round((amt/budget)*100));
+  const sc=scoreDay(ds);
+
+  document.getElementById('today-metrics').innerHTML=`
+    <div class="mc"><div class="mc-l">今日投入</div><div class="mc-v">¥${amt}</div><div class="mc-s">${totalH.toFixed(1)}小时</div></div>
+    <div class="mc"><div class="mc-l">剩余资产</div><div class="mc-v">¥${Math.max(0,budget-amt)}</div><div class="mc-s">投入率 ${pct}%</div></div>
+    <div class="mc"><div class="mc-l">今日评级</div><div class="mc-v">${sc?`<span class="panel-score ${sc.cls}" style="font-size:16px">${sc.label}</span>`:'—'}</div><div class="mc-s">${sc?sc.tip:'暂无'}</div></div>
+    <div class="mc"><div class="mc-l">预期收益</div><div class="mc-v" style="color:#7A9173">¥${Math.round(es.reduce((s,e)=>{return s+h2a(e.hours)*(ROI_MULT[e.cat]||1)},0))}</div><div class="mc-s">加权估算</div></div>
+  `;
+
+  const sel=document.getElementById('t-cat');
+  const prev=sel?sel.value:'';
+  document.getElementById('t-cat').innerHTML=cats.map(c=>`<option value="${c.id}"${c.id===prev?' selected':''}>${c.name}</option>`).join('');
+
+  document.getElementById('today-entries').innerHTML=es.length===0?
+    '<div style="text-align:center;padding:1rem;color:var(--color-text-tertiary);font-size:13px">暂无记录</div>':
+    [...es].reverse().map((e,ri)=>{
+      const i=es.length-1-ri;
+      const cat=getCat(e.cat);
+      return `<div class="e-item">
+        <div class="dot" style="background:${cat.color}"></div>
+        <span style="color:var(--color-text-primary)">${cat.name}</span>
+        <span style="color:var(--color-text-secondary)">${e.hours}h</span>
+        <span style="font-weight:500;color:var(--color-text-primary)">¥${h2a(e.hours)}</span>
+        ${e.note?`<span style="color:var(--color-text-tertiary);font-size:12px">${e.note}</span>`:''}
+        <button class="e-del" onclick="delEntry('${ds}',${i})" aria-label="删除">×</button>
+      </div>`;
+    }).join('');
+}
+
+function addFromToday(){
+  const cat=document.getElementById('t-cat').value;
+  const h=parseFloat(document.getElementById('t-hours').value);
+  const note=document.getElementById('t-note').value.trim();
+  if(!cat||isNaN(h)||h<=0) return;
+  const ds=todayStr();
+  if(!allData[ds]) allData[ds]=[];
+  allData[ds].push({cat,hours:h,note,time:Date.now()});
+  sv('tc_data',allData);
+  document.getElementById('t-hours').value='';
+  document.getElementById('t-note').value='';
+  renderToday();
+}
+
+function renderAnalysis(){
+  const all=Object.values(allData).flat();
+  const catTotals={};
+  all.forEach(e=>{catTotals[e.cat]=(catTotals[e.cat]||0)+e.hours});
+  const totalH=all.reduce((s,e)=>s+e.hours,0);
+  const totalAmt=h2a(totalH);
+  const days=Object.keys(allData).length||1;
+
+  document.getElementById('analysis-metrics').innerHTML=`
+    <div class="mc"><div class="mc-l">累计投资</div><div class="mc-v">¥${totalAmt.toLocaleString()}</div><div class="mc-s">${totalH.toFixed(0)}小时</div></div>
+    <div class="mc"><div class="mc-l">记录天数</div><div class="mc-v">${days}</div><div class="mc-s">日均¥${Math.round(totalAmt/days)}</div></div>
+    <div class="mc"><div class="mc-l">预期总收益</div><div class="mc-v" style="color:#7A9173">¥${Math.round(all.reduce((s,e)=>s+h2a(e.hours)*(ROI_MULT[e.cat]||1),0)).toLocaleString()}</div><div class="mc-s">加权估算</div></div>
+  `;
+
+  if(!Object.keys(catTotals).length){
+    document.getElementById('analysis-bars').innerHTML='<div style="text-align:center;padding:1.5rem;color:var(--color-text-tertiary);font-size:13px">暂无数据</div>';
+    document.getElementById('roi-detail').innerHTML='';
+    return;
+  }
+  const maxH=Math.max(...Object.values(catTotals));
+  document.getElementById('analysis-bars').innerHTML=Object.entries(catTotals).sort((a,b)=>b[1]-a[1]).map(([cid,h])=>{
+    const cat=getCat(cid);
+    const a=h2a(h);
+    return `<div class="cat-row">
+      <div class="dot" style="background:${cat.color}"></div>
+      <div class="cat-label">${cat.name}</div>
+      <div class="bar-bg"><div class="bar-fill" style="width:${Math.round((h/maxH)*100)}%;background:${cat.color}"></div></div>
+      <div class="cat-val">¥${a}</div>
+      <div class="cat-roi"><span style="font-size:11px;padding:2px 7px;border-radius:8px;background:${cat.color}22;color:var(--color-text-secondary)">${cat.roi}</span></div>
+    </div>`;
+  }).join('');
+
+  document.getElementById('roi-detail').innerHTML=Object.entries(catTotals).sort((a,b)=>b[1]-a[1]).map(([cid,h])=>{
+    const cat=getCat(cid);
+    const a=h2a(h);
+    const mult=ROI_MULT[cid]||1.0;
+    const proj=Math.round(a*mult);
+    const gain=proj-a;
+    return `<div style="display:flex;align-items:flex-start;gap:10px;padding:10px 0;border-bottom:0.5px solid var(--color-border-tertiary)">
+      <div style="width:10px;height:10px;border-radius:50%;background:${cat.color};margin-top:3px;flex-shrink:0"></div>
+      <div style="flex:1">
+        <div style="font-size:13px;font-weight:500;color:var(--color-text-primary)">${cat.name}</div>
+        <div style="font-size:12px;color:var(--color-text-secondary);margin-top:2px">${cat.roiDesc||'—'}</div>
+      </div>
+      <div style="text-align:right">
+        <div style="font-size:13px;font-weight:500;color:var(--color-text-primary)">¥${a} → ¥${proj}</div>
+        <div style="font-size:11px;color:#7A9173">+¥${gain} 增值</div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function renderHistory(){
+  const all=Object.values(allData).flat();
+  const totalAmt=h2a(all.reduce((s,e)=>s+e.hours,0));
+  const days=Object.keys(allData).length||1;
+  const avg=Math.round(totalAmt/days);
+
+  const scores={S:0,A:0,B:0,C:0};
+  Object.keys(allData).forEach(d=>{const sc=scoreDay(d);if(sc)scores[sc.label]++});
+
+  document.getElementById('history-metrics').innerHTML=`
+    <div class="mc"><div class="mc-l">累计总投入</div><div class="mc-v">¥${totalAmt.toLocaleString()}</div><div class="mc-s">${days}天</div></div>
+    <div class="mc"><div class="mc-l">日均投入</div><div class="mc-v">¥${avg}</div><div class="mc-s">占${Math.round(avg/budget*100)}%资产</div></div>
+    <div class="mc"><div class="mc-l">S/A级天数</div><div class="mc-v">${scores.S+scores.A}</div><div class="mc-s">卓越+高效</div></div>
+  `;
+
+  const DOWS=['一','二','三','四','五','六','日'];
+  document.getElementById('hmap-dow').innerHTML=DOWS.map(d=>`<div class="hmap-label">${d}</div>`).join('');
+
+  const cells90=[];
+  const ref=new Date(today);
+  ref.setDate(ref.getDate()-89);
+  let startDow=ref.getDay(); startDow=startDow===0?6:startDow-1;
+  for(let i=0;i<startDow;i++) cells90.push(null);
+  for(let i=0;i<90;i++){
+    const d=new Date(ref); d.setDate(ref.getDate()+i);
+    cells90.push(fmt(d));
+  }
+  while(cells90.length%7!==0) cells90.push(null);
+
+  const maxAmt=Math.max(1,...Object.values(allData).map(es=>h2a(es.reduce((s,e)=>s+e.hours,0))));
+  const COLORS=['#F5F0EB','#E8D5D3','#C9A9A6','#A8B5A2','#9BAAB4'];
+  document.getElementById('hmap').innerHTML=cells90.map(ds=>{
+    if(!ds) return `<div style="height:28px"></div>`;
+    const a=dayAmt(ds);
+    const sc=scoreDay(ds);
+    const ci=a===0?0:Math.min(4,Math.ceil((a/maxAmt)*4));
+    const isT=ds===todayStr();
+    return `<div class="hmap-cell" style="background:${COLORS[ci]};border:${isT?'1.5px solid #9BAAB4':'none'}" 
+      title="${ds}: ¥${a}${sc?' ('+sc.label+')':''}" onclick="selectDay('${ds}');sw('calendar')">
+      ${sc&&a>0?`<span style="font-size:9px;font-weight:500;color:${ci>=3?'#4A6344':'#888'}">${sc.label}</span>`:''}
+    </div>`;
+  }).join('');
+
+  const last30=[];
+  for(let i=29;i>=0;i--){const d=new Date(today);d.setDate(today.getDate()-i);last30.push(fmt(d))}
+  const chartAmts=last30.map(d=>dayAmt(d));
+
+  if(tChart){tChart.destroy();tChart=null}
+  tChart=new Chart(document.getElementById('trend-chart'),{
+    type:'line',
+    data:{
+      labels:last30.map(d=>d.slice(5)),
+      datasets:[{
+        label:'每日投入',data:chartAmts,
+        borderColor:'#9BAAB4',backgroundColor:'rgba(155,170,180,0.10)',
+        borderWidth:1.5,pointRadius:3,pointBackgroundColor:'#9BAAB4',fill:true,tension:0.35
+      }]
+    },
+    options:{
+      responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{display:false}},
+      scales:{
+        y:{beginAtZero:true,ticks:{callback:v=>'¥'+v,font:{size:11}},grid:{color:'rgba(0,0,0,0.04)'}},
+        x:{ticks:{autoSkip:true,maxTicksLimit:10,font:{size:10}},grid:{display:false}}
+      }
+    }
+  });
+}
+
+function renderSettings(){
+  document.getElementById('set-budget').value=budget;
+  document.getElementById('set-hour-val').textContent=Math.round(budget/24);
+  const rois=[{v:'roi-high',l:'高回报'},{v:'roi-mid',l:'中期'},{v:'roi-low',l:'必要'}];
+  document.getElementById('cat-list').innerHTML=cats.map((c,i)=>`
+    <div style="display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:0.5px solid var(--color-border-tertiary)">
+      <div style="width:10px;height:10px;border-radius:50%;background:${c.color};flex-shrink:0"></div>
+      <span style="flex:1;font-size:13px;color:var(--color-text-primary)">${c.name}</span>
+      <select style="font-size:12px;padding:2px 4px" onchange="setCatRoi(${i},this.value)">
+        ${rois.map(r=>`<option value="${r.v}"${c.roiClass===r.v?' selected':''}>${r.l}</option>`).join('')}
+      </select>
+      ${i>=DEF_CATS.length?`<button onclick="removeCat(${i})" style="font-size:12px;padding:2px 6px">删除</button>`:''}
+    </div>`).join('');
+}
+
+function addCat(){
+  const name=document.getElementById('new-cat-name').value.trim();
+  const color=document.getElementById('new-cat-color').value;
+  if(!name) return;
+  cats.push({id:'c'+Date.now(),name,color,roi:'自定义',roiClass:'roi-mid',roiDesc:'自定义分类'});
+  sv('tc_cats',cats);
+  document.getElementById('new-cat-name').value='';
+  renderSettings();
+}
+
+function removeCat(i){cats.splice(i,1);sv('tc_cats',cats);renderSettings()}
+function setCatRoi(i,cls){
+  const m={'roi-high':'高回报','roi-mid':'中期','roi-low':'必要'};
+  cats[i].roiClass=cls;cats[i].roi=m[cls]||cls;sv('tc_cats',cats);
+}
+
+function saveBudget(){
+  budget=parseInt(document.getElementById('set-budget').value)||2400;
+  sv('tc_budget',budget);
+  document.getElementById('set-hour-val').textContent=Math.round(budget/24);
+  document.getElementById('hdr-budget').textContent=budget;
+  renderCal();
+}
+
+function resetToday(){
+  if(!confirm('确认清空今日记录？')) return;
+  delete allData[todayStr()];sv('tc_data',allData);
+  renderToday();renderCal();
+}
+function resetAll(){
+  if(!confirm('清空所有数据？不可恢复。')) return;
+  allData={};sv('tc_data',allData);renderCal();
+}
+
+document.getElementById('hdr-budget').textContent=budget;
+renderCal();
+</script>
